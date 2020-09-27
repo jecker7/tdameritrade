@@ -1,15 +1,14 @@
-tests: ## Clean and Make unit tests
-	python3 -m pytest -v tests --cov=tdameritrade
-
-test: lint ## run the tests for travis CI
-	@ python3 -m pytest -v tests --cov=tdameritrade
+tests: ## Make unit tests
+	python3.7 -m pytest -v tdameritrade/tests --cov=tdameritrade  --junitxml=python_junit.xml --cov-report=xml --cov-branch
 
 testall: ## run the tests including those that hit the actual api
-	@ python3 -m pytest -v tests --cov=tdameritrade
+	@ python3.7 -m pytest -v tdameritrade/tests --cov=tdameritrade  --junitxml=python_junit.xml --cov-report=xml --cov-branch
 
 lint: ## run linter
-	pylint tdameritrade || echo
 	flake8 tdameritrade 
+
+fix:  ## run autopep8/tslint fix
+	autopep8 --in-place -r -a -a tdameritrade/
 
 annotate: ## MyPy type annotation check
 	mypy -s tdameritrade
@@ -28,10 +27,13 @@ docs:  ## make documentation
 	open ./docs/_build/html/index.html
 
 dist:  ## dist to pypi
-	python3 setup.py sdist upload -r pypi
+	rm -rf dist build
+	python3 setup.py sdist
+	python3 setup.py bdist_wheel
+	twine check dist/* && twine upload dist/*
 
 install:  ## install to site-packages
-	python3 setup.py install
+	pip3 install .
 
 # Thanks to Francoise at marmelab.com for this
 .DEFAULT_GOAL := help
